@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="static/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
+    <title>Three.JS-Webpack Boilerplate</title>
+
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+
+    <!-- three.js -->
+    <script src="https://unpkg.com/three@0.123.0/build/three.js"></script>
+    <script src="https://unpkg.com/three@0.123.0/examples/js/loaders/GLTFLoader.js"></script>
+
+
+  </head>
+  <body>
+    <canvas id="ex-03"></canvas>
+    <!-- 카메라 끄는 버튼 추가 -->
+    <!-- <button id="toggleCameraBtn" onclick="">Toggle Camera</button> -->
+
+    <a onclick="activateXR()" class="mdc-button mdc-button--raised mdc-button--accent">
+      Start augmented reality
+    </a>
+    <script src="public/bundle.js"></script>
+  </body>
+</html>
