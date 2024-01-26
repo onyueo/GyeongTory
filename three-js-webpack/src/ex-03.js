@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-// 사진 적용이 안되고 화면전환 안됨
+// 사진 적용이 안되고 화면전환 안됨 주말간 수정할것!
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
