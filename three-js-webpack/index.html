@@ -1,28 +1,33 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="icon" href="static/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
-    <title>Three.JS-Webpack Boilerplate</title>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
+  <title>Three.JS-Webpack Boilerplate</title>
+  <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+  <script src="https://unpkg.com/three@0.123.0/build/three.js"></script>
+  <script src="https://unpkg.com/three@0.123.0/examples/js/loaders/GLTFLoader.js"></script>
+<style>
+  #ex-03{
+  display: none;
 
-    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-
-    <!-- three.js -->
-    <script src="https://unpkg.com/three@0.123.0/build/three.js"></script>
-    <script src="https://unpkg.com/three@0.123.0/examples/js/loaders/GLTFLoader.js"></script>
-
-
-  </head>
-  <body>
-    <canvas id="ex-03"></canvas>
-    <!-- 카메라 끄는 버튼 추가 -->
-    <!-- <button id="toggleCameraBtn" onclick="">Toggle Camera</button> -->
-
-    <a onclick="activateXR()" class="mdc-button mdc-button--raised mdc-button--accent">
-      Start augmented reality
-    </a>
-    <script src="public/bundle.js"></script>
-  </body>
+}
+</style>
+</head>
+<body>
+  <canvas id="ex-03"></canvas>
+  <!-- <a onclick="activateXR()" class="mdc-button mdc-button--raised mdc-button--accent">내 이름은 쏘우 게임을 시작하지ㅎㅋㅋㅎㅋㅎㅋㅎㅋㅎㅋㅎ</a> -->
+  <button id="btn-front">Front</button>
+  <button id="btn-back">Back</button>
+  <script src="public/bundle.js"></script>
+  <script src="ex-03.js"></script>
+  <script>
+    function activateXR(params){
+      
+    }
+    
+  </script>
+</body>
 </html>
+

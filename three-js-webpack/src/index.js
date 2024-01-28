@@ -24,3 +24,4 @@ new App({
   width: canvas.width,
   height: canvas.height,
 });
+
