@@ -1,8 +1,10 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer();
+
+let scene = new THREE.Scene();
+let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+let renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
@@ -25,12 +27,19 @@ navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
     const toryMaterial = new THREE.MeshBasicMaterial({ map: toryTexture });
     const videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
     scene.add(videoMesh);
-    toryMaterial.color.set(0xffffff);
-    const toryGeometry = new THREE.Geometry(1, 1, 1);
-    const tory = new THREE.Mesh(toryGeometry, toryMaterial);
-    scene.add(tory);
 
-    camera.position.z = 5;
+    let loader = new GLTFLoader();
+    loader.load("../static/img/hmm/file.gltf", function (gltf) {
+
+    scene.add(gltf.scene);
+
+
+    animate();
+}, undefined, function (error) {
+    console.error('Error loading GLTF model:', error);
+})
+
+    camera.position.z = 3;
 
 
     videoStream = stream;
