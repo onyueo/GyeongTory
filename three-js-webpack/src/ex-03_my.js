@@ -1,59 +1,116 @@
-import * as THREE from 'three'
-import { WEBGL } from './webgl'
+// THREE 라이브러리에서 필요한 모듈을 가져오기
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-if (WEBGL.isWebGLAvailable()) {
-   // 장면 받아오기
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x776777)
+// 씬, 카메라, 렌더러 초기화
+let scene = new THREE.Scene();
+let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+let renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-   // 카메라 
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth, window.innerHeight, 0.1, 1000)
-  camera.position.z = 5;    
-  // html에서 id설정해서 생기는 요소를 적용하고 싶을때
-  // 캔버스를 가지고 와서 적용한다
-  const canvas = document.querySelector('#ex-03');
-  const renderer = new THREE.WebGLRenderer({canvas});
+// 비디오와 비디오 스트림 변수 초기화
+let video;
+let videoStream;
 
-  //renderer               
-//   const renderer = new THREE.WebGLRenderer();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+// 웹캠 비디오 스트림을 가져와서 텍스처로 적용하는 코드
+navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+    // 비디오 엘리먼트 생성 및 웹캠 스트림 적용
+    video = document.createElement('video');
+    video.srcObject = stream;
+    video.play();
 
-  
-  //매쉬설정하기 => 너비 높이 깊이
-  const geometry = new THREE.BoxGeometry(1,1,1);
-  // 매쉬 설정하기 ==> 재질의 색
-  const material = new THREE.MeshStandardMaterial({
-    color:0x999999
-  })
-  // 큐브의 geo,mat을 적용
-  const cube = new THREE.Mesh(geometry, material)
-  // scene에 cube적용   
-  scene.add(cube);
-  // 현재 장면은 어떤 태그에 노출시킬 것인지 작성
-  // 직접적으로 바디에다가 캔버스를 바로 적용
-  // html에서 바로 적용하는것으로 적을 수도 있다.
-//   document.body.appendChild(renderer.domElement);
+    // 비디오 텍스처 및 재질, 지오메트리 생성 및 메시에 적용
+    const videoTexture = new THREE.VideoTexture(video);
+    const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
+    const videoGeometry = new THREE.PlaneGeometry(16, 9);
+    const videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
+    scene.add(videoMesh);
 
+    // GLTF 모델 로드 및 씬에 추가
+    let loader = new GLTFLoader();
+    loader.load("../static/img/hmm/file.gltf", function (gltf) {
+        scene.add(gltf.scene);
+        animate();
+    }, undefined, function (error) {
+        console.error('Error loading GLTF model:', error);
+    });
 
+    // 카메라 초기 위치 설정
+    camera.position.z = 3;
 
-  // 장면과 카메라를 가져온다. 애니메이션을 넣을 것이면 변환
-//   renderer.render(scene,camera)
-// requestAnimationFrame(render) 
-// 이렇게 해서 render될 것에 어떤 것들이 들어가는지 확인
-function render(time) {
-    // 시간을 초로 바꾸어주는것
-    time *= 0.001;
+    // 비디오 스트림 저장
+    videoStream = stream;
 
-    // cube.rotation.x = time;
-    // cube.rotation.y = time;
-    renderer.render(scene, camera);
-    // 애니메이션 프레임을 렌더에서 응답받은것으로 작성한다.
-    requestAnimationFrame(render)
-}
-requestAnimationFrame(render)
-  
-  
-  } else {
-  var warning = WEBGL.getWebGLErrorMessage()
-  document.body.appendChild(warning)
-}
+    // 애니메이션 함수 정의
+    const animate = () => {
+        // 비디오 데이터가 충분히 확보되면 텍스처 업데이트
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            videoTexture.needsUpdate = true;
+        }
+
+        // 렌더링 및 다음 프레임 요청
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+    };
+
+    // 애니메이션 시작
+    animate();
+}).catch((error) => {
+    console.error('Error accessing webcam:', error);
+});
+
+// 창 크기 변경 이벤트 리스너
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// 웹캠 켜기/끄기 함수 정의
+const startVideo = () => {
+    navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+        video.srcObject = stream;
+        video.play();
+
+        // 비디오 텍스처 갱신
+        const videoTexture = new THREE.VideoTexture(video);
+        scene.getObjectByName('videoMesh').material.map = videoTexture;
+
+        // 비디오 스트림 저장
+        videoStream = stream;
+    }).catch((error) => {
+        console.error('Error accessing webcam:', error);
+    });
+};
+
+const stopVideo = () => {
+    // 현재 웹캠 스트림 중지
+    if (videoStream) {
+        const tracks = videoStream.getTracks();
+        tracks.forEach(track => track.stop());
+    }
+};
+
+// 프론트/백 카메라 전환 이벤트 리스너
+document.getElementById('btn-front').addEventListener('click', () => {
+    stopVideo();
+    startVideo();
+});
+
+document.getElementById('btn-back').addEventListener('click', () => {
+    stopVideo();
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then((stream) => {
+        video.srcObject = stream;
+        video.play();
+
+        // 비디오 텍스처 갱신
+        const videoTexture = new THREE.VideoTexture(video);
+        scene.getObjectByName('videoMesh').material.map = videoTexture;
+
+        // 비디오 스트림 저장
+        videoStream = stream;
+    }).catch((error) => {
+        console.error('Error accessing webcam:', error);
+    });
+});

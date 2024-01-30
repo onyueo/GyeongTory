@@ -21,10 +21,7 @@ navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
     const videoGeometry = new THREE.PlaneGeometry(16, 9);
     // 아래처럼만 적으면 텍스처가 로딩된 후에 갱신이 되지 않음 , 갱신 할 수 있도록 추가코드 작성
     // const toryTexture = new THREE.TextureLoader().load('./icons/1.jpg',);
-    const toryTexture = new THREE.TextureLoader().load('./icons/1.jpg',(params)=>{
-      params.needsUpdate = true;
-    });
-    const toryMaterial = new THREE.MeshBasicMaterial({ map: toryTexture });
+
     const videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
     scene.add(videoMesh);
 
