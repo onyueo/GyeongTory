@@ -1,105 +1,125 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+class Cs03 {
 
-let scene = new THREE.Scene();
-let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-let renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+    constructor() {
+        // Scene, Camera, Renderer 생성
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(this.renderer.domElement);
 
-let video;
-let videoStream;
+        // 비디오 및 비디오 스트림 초기화
+        this.video = document.createElement('video');
+        this.videoStream = null;
 
-navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-    video = document.createElement('video');
-    video.srcObject = stream;
-    video.play();
+        // 광원 및 비디오 텍스처 생성
+        this.addLights();
+        this.addVideoMesh();
 
-    const videoTexture = new THREE.VideoTexture(video);
-    const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
-    const videoGeometry = new THREE.PlaneGeometry(16, 9);
-    // 아래처럼만 적으면 텍스처가 로딩된 후에 갱신이 되지 않음 , 갱신 할 수 있도록 추가코드 작성
-    // const toryTexture = new THREE.TextureLoader().load('./icons/1.jpg',);
+        // GLTF 모델 로드
+        this.loadGltfModel();
 
-    const videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
-    scene.add(videoMesh);
+        // 카메라 초기 위치 설정
+        this.camera.position.z = 7;
 
-    let loader = new GLTFLoader();
-    loader.load("../static/img/hmm/file.gltf", function (gltf) {
+        // 창 크기 조절 이벤트 등록
+        window.addEventListener('resize', this.handleResize.bind(this));
 
-    scene.add(gltf.scene);
+        // 비디오 제어 버튼 이벤트 등록
+        document.getElementById('btn-front').addEventListener('click', this.startVideo.bind(this));
+        document.getElementById('btn-back').addEventListener('click', this.switchCamera.bind(this));
+    }
 
+    addLights() {
+        // 광원 추가
+        this.light = new THREE.DirectionalLight(0xffffff, 1);
+        this.light.position.set(1, 1, 1).normalize();
+        this.scene.add(this.light);
+    }
 
-    animate();
-}, undefined, function (error) {
-    console.error('Error loading GLTF model:', error);
-})
+    addVideoMesh() {
+        // 비디오 메쉬 생성
+        const videoTexture = new THREE.VideoTexture(this.video);
+        const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
+        const videoGeometry = new THREE.PlaneGeometry(16, 9);
 
-    camera.position.z = 3;
+        this.videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
+        this.scene.add(this.videoMesh);
+    }
 
+    loadGltfModel() {
+        // GLTF 모델 로드
+        let loader = new GLTFLoader();
 
-    videoStream = stream;
+        loader.load("../static/img/tory.gltf", (gltf) => {
+            console.log('GLTF 모델이 성공적으로 로드되었습니다.', gltf);
 
-    const animate = () => {
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            videoTexture.needsUpdate = true;
+            // 씬에 로드된 객체들 추가
+            gltf.scene.traverse((child) => {
+                if (child.isMesh) {
+                    this.scene.add(child);
+                }
+            });
+
+            // 애니메이션 시작
+            this.animate();
+        }, undefined, (error) => {
+            console.error('GLTF 모델 로딩 중 오류:', error);
+        });
+    }
+
+    animate() {
+        // 비디오 텍스처 갱신
+        if (this.video.readyState === this.video.HAVE_ENOUGH_DATA) {
+            this.videoMesh.material.map.needsUpdate = true;
         }
 
-        renderer.render(scene, camera);
-        requestAnimationFrame(animate);
-    };
-
-    animate();
-}).catch((error) => {
-    console.error('Error accessing webcam:', error);
-});
-
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-let isCameraOn = false;
-
-const startVideo = () => {
-    navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-        video.srcObject = stream;
-        video.play();
-
-        const videoTexture = new THREE.VideoTexture(video);
-        scene.getObjectByName('videoMesh').material.map = videoTexture;
-
-        videoStream = stream;
-    }).catch((error) => {
-        console.error('Error accessing webcam:', error);
-    });
-};
-
-const stopVideo = () => {
-    if (videoStream) {
-        const tracks = videoStream.getTracks();
-        tracks.forEach(track => track.stop());
+        // 렌더링 및 애니메이션 재귀 호출
+        this.renderer.render(this.scene, this.camera);
+        requestAnimationFrame(this.animate.bind(this));
     }
-};
 
-document.getElementById('btn-front').addEventListener('click', () => {
-    stopVideo();
-    startVideo();
-});
+    handleResize() {
+        // 창 크기 조절 시 카메라 및 렌더러 업데이트
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
 
-document.getElementById('btn-back').addEventListener('click', () => {
-    stopVideo();
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then((stream) => {
-        video.srcObject = stream;
-        video.play();
+    startVideo() {
+        // 비디오 시작
+        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+            this.video.srcObject = stream;
+            this.video.play();
 
-        const videoTexture = new THREE.VideoTexture(video);
-        scene.getObjectByName('videoMesh').material.map = videoTexture;
+            const videoTexture = new THREE.VideoTexture(this.video);
+            this.videoMesh.material.map = videoTexture;
 
-        videoStream = stream;
-    }).catch((error) => {
-        console.error('Error accessing webcam:', error);
-    });
-});
+            this.videoStream = stream;
+        }).catch((error) => {
+            console.error('웹캠 접근 중 오류:', error);
+        });
+    }
+
+    switchCamera() {
+        // 카메라 전환 (후면 카메라로 전환)
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then((stream) => {
+            this.video.srcObject = stream;
+            this.video.play();
+
+            const videoTexture = new THREE.VideoTexture(this.video);
+            this.videoMesh.material.map = videoTexture;
+
+            this.videoStream = stream;
+        }).catch((error) => {
+            console.error('웹캠 접근 중 오류:', error);
+        });
+    }
+}
+
+// 클래스 인스턴스 생성
+const cs03Instance = new Cs03();
+

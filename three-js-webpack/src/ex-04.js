@@ -1,111 +1,248 @@
-// import * as THREE from 'three'
-// import { WEBGL } from './webgl'
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-// if (WEBGL.isWebGLAvailable()) {
-//     // 장면 받아오기
-//     const scene = new THREE.Scene();
-//     // scene.background = new THREE.Color(0x776777)
+class Cs03 {
 
-//     // 카메라 width와 height가 /로 표현안되고 , 또는 .으로 표기되면 전체 화면에 변화를 줌
-//     const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000)
-//     camera.position.z = 5;    
-//     // html에서 id설정해서 생기는 요소를 적용하고 싶을때
-//     // 캔버스를 가지고 와서 적용한다
-//     const canvas = document.querySelector('#ex-03');
-//     const renderer = new THREE.WebGLRenderer({ 
-//     // canvas === document.body.appendChild(renderer.domElement)
-//     // 도형 주변에 블러처럼 흐물흐물하게 나타나면 해당 항목을 잡아줌
-//     antialias:true,
-//     // 투명도 조절
-//     alpha: true,
-//     });
+    constructor() {
+        // Scene, Camera, Renderer 생성
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(this.renderer.domElement);
 
-//     //renderer               
-//     //   const renderer = new THREE.WebGLRenderer();
-//     renderer.setSize(window.innerWidth, window.innerHeight);
-//     // 이걸 추가해주면 renderer에 canvas를 추가해주지 않아도 됨
-//     document.body.appendChild(renderer.domElement);
+        // 비디오 및 비디오 스트림 초기화
+        this.video = document.createElement('video');
+        this.videoStream = null;
 
-//     //빛 설정
-//     //색상와 세기 설정
-//     const pointLight = new THREE.PointLight(0xffffff,1)
+        // 광원 및 비디오 텍스처 생성
+        this.addLights();
+        this.addVideoMesh();
+
+        // GLTF 모델 로드
+        this.loadGltfModel();
+
+        // 카메라 초기 위치 설정
+        this.camera.position.z = 7;
+
+        // 창 크기 조절 이벤트 등록
+        window.addEventListener('resize', this.handleResize.bind(this));
+
+        // 비디오 제어 버튼 이벤트 등록
+        document.getElementById('btn-front').addEventListener('click', this.startVideo.bind(this));
+        document.getElementById('btn-back').addEventListener('click', this.switchCamera.bind(this));
+    }
+
+    addLights() {
+        // 광원 추가
+        this.light = new THREE.DirectionalLight(0xffffff, 1);
+        this.light.position.set(1, 1, 1).normalize();
+        this.scene.add(this.light);
+    }
+
+    addVideoMesh() {
+        // 비디오 메쉬 생성
+        const videoTexture = new THREE.VideoTexture(this.video);
+        const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
+        const videoGeometry = new THREE.PlaneGeometry(16, 9);
+
+        this.videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
+        this.scene.add(this.videoMesh);
+    }
+
+    loadGltfModel() {
+        // GLTF 모델 로드
+        let loader = new GLTFLoader();
+
+        loader.load("../static/img/tory.gltf", (gltf) => {
+            console.log('GLTF 모델이 성공적으로 로드되었습니다.', gltf);
+
+            // 씬에 로드된 객체들 추가
+            gltf.scene.traverse((child) => {
+                if (child.isMesh) {
+                    this.scene.add(child);
+                }
+            });
+
+            // 애니메이션 시작
+            this.animate();
+        }, undefined, (error) => {
+            console.error('GLTF 모델 로딩 중 오류:', error);
+        });
+    }
+
+    animate() {
+        // 비디오 텍스처 갱신
+        if (this.video.readyState === this.video.HAVE_ENOUGH_DATA) {
+            this.videoMesh.material.map.needsUpdate = true;
+        }
+
+        // 렌더링 및 애니메이션 재귀 호출
+        this.renderer.render(this.scene, this.camera);
+        requestAnimationFrame(this.animate.bind(this));
+    }
+
+    handleResize() {
+        // 창 크기 조절 시 카메라 및 렌더러 업데이트
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    startVideo() {
+        // 비디오 시작
+        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+            this.video.srcObject = stream;
+            this.video.play();
+
+            const videoTexture = new THREE.VideoTexture(this.video);
+            this.videoMesh.material.map = videoTexture;
+
+            this.videoStream = stream;
+        }).catch((error) => {
+            console.error('웹캠 접근 중 오류:', error);
+        });
+    }
+
+    switchCamera() {
+        // 카메라 전환 (후면 카메라로 전환)
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then((stream) => {
+            this.video.srcObject = stream;
+            this.video.play();
+
+            const videoTexture = new THREE.VideoTexture(this.video);
+            this.videoMesh.material.map = videoTexture;
+
+            this.videoStream = stream;
+        }).catch((error) => {
+            console.error('웹캠 접근 중 오류:', error);
+        });
+    }
+}
+
+// 클래스 인스턴스 생성
+const cs03Instance = new Cs03();
+
+
+import * as THREE from 'three';
+import { Light } from 'three.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
+class cs-03 {
     
-//     //xyz의 값을 적어 넣음
-//     pointLight.position.set(0,2,12)
-//     //빛으로 만들어 둔 것을 적용
-//     scene.add(pointLight)
+    construtor(){
 
+        let scene = new THREE.Scene();
+        let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        let renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        
+        let video;
+        let videoStream;
+        
+        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+            video = document.createElement('video');
+            video.srcObject = stream;
+            video.play();
+        
+            const videoTexture = new THREE.VideoTexture(video);
+            const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
+            const videoGeometry = new THREE.PlaneGeometry(16, 9);
+            // 아래처럼만 적으면 텍스처가 로딩된 후에 갱신이 되지 않음 , 갱신 할 수 있도록 추가코드 작성
+            // const toryTexture = new THREE.TextureLoader().load('./icons/1.jpg',);
+            const light = new THREE.DirectionalLight(0xffffff,1);
+            light.position.set(1,1,1).normalize();
+            scene.add(light)
+            const videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
+            scene.add(videoMesh);
+        
+            let loader = new GLTFLoader();
+        
+            loader.load("../static/img/tory.gltf", function (gltf) {
+                console.log('GLTF 모델이 성공적으로 로드되었습니다.', gltf);
+            
+                // 직접 씬에 로드된 객체들을 추가
+                gltf.scene.traverse(function (child) {
+                    if (child.isMesh) {
+                
+                        scene.add(child);
+                        
+                    }
+                });
+            
+                animate();
+        }, undefined, function (error) {
+            console.error('GLTF 모델 로딩 중 오류:', error);
+        });
+            
+            camera.position.z = 7;
+        
+        
+            videoStream = stream;
+        
+            const animate = () => {
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    videoTexture.needsUpdate = true;
+                }
+        
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate);
+            };
+        
+            animate();
+        }).catch((error) => {
+            console.error('Error accessing webcam:', error);
+        });
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        let isCameraOn = false;
+        
+        const startVideo = () => {
+            navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+                video.srcObject = stream;
+                video.play();
+        
+                const videoTexture = new THREE.VideoTexture(video);
+                scene.getObjectByName('videoMesh').material.map = videoTexture;
+        
+                videoStream = stream;
+            }).catch((error) => {
+                console.error('Error accessing webcam:', error);
+            });
+        };
+        
+        const stopVideo = () => {
+            if (videoStream) {
+                const tracks = videoStream.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+        };
+        
+        document.getElementById('btn-front').addEventListener('click', () => {
+            stopVideo();
+            startVideo();
+        });
+        
+        document.getElementById('btn-back').addEventListener('click', () => {
+            stopVideo();
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then((stream) => {
+                video.srcObject = stream;
+                video.play();
+        
+                const videoTexture = new THREE.VideoTexture(video);
+                scene.getObjectByName('videoMesh').material.map = videoTexture;
+        
+                videoStream = stream;
+            }).catch((error) => {
+                console.error('Error accessing webcam:', error);
+            });
+        });
+    }
+}
 
-//     //매쉬설정하기 => 너비 높이 깊이 도형
-//     const geometry = new THREE.BoxGeometry(1,1,1);
-//     // 매쉬 설정하기 ==> 재질의 색 , 질감
-//     // basic = 빛의 변화에 영향을 받지 않는다. 색상만 적용받음
-//     // standard = 물리적 기반을 가지고 개발 pbr 많은 3d엔진에서 이용
-//     // Physical ==> 스탠다드보다 조금 더 고품질을 보여줌 clearcoat,clearcoatroughness에서 차이보여줌 
-//     // depth ==> 재질의 깊이감을 알 수 있도록 알려주는것
-//     // lambert / phong ==> 빛을 기준으로 표현
-//     // lambert 빛을 반사하는 재질에서 3d표현 입체감이 좀떨어짐
-//     // phong 반짝이는 금속재질을 나타내는데 더 유리 입체감이 좋음
-    
-//     const material = new THREE.MeshStandardMaterial({
-//     color:0x999999, 
-//     // 메탈재질 표현 0~1까지 재질 표현 적용하면 시커매짐
-//     // metalness : 0.3,
-//     // 흰색을 기준으로 투명도 설정 (흰색에도 안보일거냐 보일거냐)
-//     // transparent : true,
-//     // 그냥 전체 투명도 transparent 를 적용해주지 않으면 하얗게 남음 0~1까지 보면 될듯?
-//     // opacity: 0.5,
-//     // 거친 정도 이것도 0~1사이로 보면될듯?
-//     // roughness :1
-//     //윤곽선 확인 boolean
-//     // wireframe : true,
-//     // 광택 조절
-//     // shininess:60
-    
-
-//     })
-//     // 큐브의 geo,mat을 적용 
-//     const cube = new THREE.Mesh(geometry, material)
-//     // 위치를 변경할 수 있도록 지정
-//     cube.position.x = -1.8;
-//     // scene에 cube적용   
-//     scene.add(cube);
-
-//     // 현재 장면은 어떤 태그에 노출시킬 것인지 작성
-//     // 직접적으로 바디에다가 캔버스를 바로 적용
-//     // html에서 바로 적용하는것으로 적을 수도 있다.
-//     //   document.body.appendChild(renderer.domElement);
-
-
-
-//     // 장면과 카메라를 가져온다. 애니메이션을 넣을 것이면 변환
-//     //   renderer.render(scene,camera)
-//     // requestAnimationFrame(render) 
-//     // 이렇게 해서 render될 것에 어떤 것들이 들어가는지 확인
-//     function render(time) {
-//     // 시간을 초로 바꾸어주는것
-//     time *= 0.001;
-
-//     cube.rotation.x = time;
-//     cube.rotation.y = time;
-//     renderer.render(scene, camera);
-//     // 애니메이션 프레임을 렌더에서 응답받은것으로 작성한다.
-//     requestAnimationFrame(render)
-//     }
-//     requestAnimationFrame(render)
-//     // 반응형 처리
-//     function onWindowResize(){
-//         // 전체 화면의 비율의 변화가 달라지면 => 종횡비를 잡아주는것이라 줄어들었을때 납작해지지 않도록
-//         camera.aspect = window.innerWidth/window.innerHeight;
-//         camera.updateProjectionMatrix();
-//         // 이거는 왜 ,로 나누는지 알아보자?!?
-//         renderer.setSize(window.innerWidth, window.innerHeight)
-//     }
-//     // 화면의 변화가 감지되면 사이즈를 다시 잡아라 윈도우 리사이즈 실행
-//     window.addEventListener('resize',onWindowResize)
-
-// } else {
-//     var warning = WEBGL.getWebGLErrorMessage()
-//     document.body.appendChild(warning)
-// }
-console.log("dkseo")
