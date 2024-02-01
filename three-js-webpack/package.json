@@ -1,26 +1,26 @@
 {
-  "name": "three-npm",
+  "name": "tory",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./src/tory.js",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
-    "start": "webpack-dev-server --mode development",
-    "format": "prettier --write '**/*.js'"
+    "start": "webpack serve --mode development",
+  "build": "webpack --mode production"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "gltf-loader": "^1.0.0",
     "i": "^0.3.7",
-    "three": "^0.115.0",
+    "three": "^0.161.0",
     "three-addons": "^1.2.0"
   },
   "devDependencies": {
     "prettier": "^2.0.4",
     "vite": "^5.0.12",
-    "webpack": "^4.47.0",
-    "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.3"
+    "webpack": "^5.90.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
   }
 }
