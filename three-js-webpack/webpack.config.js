@@ -3,9 +3,10 @@ const path = require('path')
 module.exports = {
   mode: 'production',
   entry: [
-    './src/tory.js',
+    './src/ex-03.js',
   ],
   output: {
+    path: path.resolve(__dirname, 'public'),
     filename: 'bundle.js',
   },
   performance: {
@@ -13,11 +14,9 @@ module.exports = {
     maxAssetSize: 1024000
   },
   devServer: {
-    static: {
-      directory: path.join(__dirname, 'dist'),
-    },
+    publicPath: '/public/',
     compress: true,
     port: 9000,
+    hot: true,
   },
 }
-

@@ -10,21 +10,36 @@
     <script src="https://unpkg.com/three@0.123.0/build/three.js"></script>
     <script src="https://unpkg.com/three@0.123.0/examples/js/loaders/GLTFLoader.js"></script>
     <style>
-    
+        #ex-03 {
+            display: none;
+        }
     </style>
 </head>
 
 <body>
-    <canvas id="tory"></canvas>
-<!-- 프론트 카메라 전환 버튼 -->
-<button id="btn-front">Front</button>
+    <canvas id="ex-03"></canvas>
+    <button id="btn-front">Front</button>
+    <button id="btn-back">Back</button>
+    <script src="public/bundle.js"></script>
+    <script src="ex-03.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Three.js 및 XR 활성화 코드
+            const cs03Instance = new Cs03();
 
-<!-- 백 카메라 전환 버튼 -->
-<button id="btn-back">Back</button>
-   
-        
+            // 웹캠 시작 버튼 클릭 이벤트
+            document.getElementById('btn-front').addEventListener('click', () => {
+                cs03Instance.stopVideo();
+                cs03Instance.startVideo();
+            });
+
+            // 후면 카메라 버튼 클릭 이벤트
+            document.getElementById('btn-back').addEventListener('click', () => {
+                cs03Instance.stopVideo();
+                cs03Instance.switchCamera();
+            });
+        });
     </script>
-
 </body>
 
 </html>
