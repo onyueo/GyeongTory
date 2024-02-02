@@ -1,30 +1,27 @@
-<!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
-    <title>Three.JS-Webpack Boilerplate</title>
-    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-    <script src="https://unpkg.com/three@0.123.0/build/three.js"></script>
-    <script src="https://unpkg.com/three@0.123.0/examples/js/loaders/GLTFLoader.js"></script>
-    <style>
-    
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
+  <title>Three.JS-Webpack Boilerplate</title>
+  <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+  <script src="https://unpkg.com/three@0.123.0/build/three.js"></script>
+  <script src="https://unpkg.com/three@0.123.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+  
+<style>
+  #ex-03{
+  display: none;
+
+}
+</style>
 </head>
-
 <body>
-    <canvas id="tory"></canvas>
-<!-- 프론트 카메라 전환 버튼 -->
-<button id="btn-front">Front</button>
-
-<!-- 백 카메라 전환 버튼 -->
-<button id="btn-back">Back</button>
-   
-        
-    </script>
-
-</body>
-
+    <canvas id="ex-03"></canvas>
+    <button id="btn-front">Front</button>
+    <button id="btn-back">Back</button>
+    <script src="public/bundle.js"></script>
+    <script src="ex-03.js"></script>
+  </body>
 </html>

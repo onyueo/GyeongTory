@@ -4,8 +4,8 @@
   "description": "",
   "main": "./src/tory.js",
   "scripts": {
-    "start": "webpack serve --mode development",
-  "build": "webpack --mode production"
+    "start": "webpack serve",
+    "build": "webpack"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +19,7 @@
   "devDependencies": {
     "prettier": "^2.0.4",
     "vite": "^5.0.12",
-    "webpack": "^5.90.0",
+    "webpack": "^5.90.1",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1"
   }

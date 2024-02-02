@@ -1,0 +1,11 @@
+Model Information:
+* title:	Chibi Mannequin
+* source:	https://sketchfab.com/3d-models/chibi-mannequin-f1e62c8973bc448fbb1cce4af763bfb9
+* author:	anasrar (https://sketchfab.com/anasrar)
+
+Model License:
+* license type:	CC-BY-NC-ND-4.0 (http://creativecommons.org/licenses/by-nc-nd/4.0/)
+* requirements:	Author must be credited. No commercial use. Modified versions can not be distributed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Chibi Mannequin" (https://sketchfab.com/3d-models/chibi-mannequin-f1e62c8973bc448fbb1cce4af763bfb9) by anasrar (https://sketchfab.com/anasrar) licensed under CC-BY-NC-ND-4.0 (http://creativecommons.org/licenses/by-nc-nd/4.0/)
