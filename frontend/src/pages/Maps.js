@@ -99,9 +99,7 @@ export default function Maps () {
         // 이외 info 추가 예정
       }
     });
-    
   }
-
   const places = [
     {no: '1', lat: 35.202018, lng: 126.811782},
     {no: '2', lat: 35.201121, lng: 126.807993},
@@ -126,14 +124,7 @@ export default function Maps () {
       //   'ngrok-skip-browser-warning': '69420',
       // }},
       );
-      // console.log('eeeee', res.data.data_body)
-
       setApi(res? [...res.data.data_body, ...places] : [...places])
-      
-      // console.log('api 정보 조회', api)
-
-      // setApi(res.data.data_body)
-
     } catch (e) {
       console.log(e.response);
     }
@@ -141,11 +132,6 @@ export default function Maps () {
   
     /* {no, asno, name_kr, name_hanja, content, sido_name, gugun_name,
              division, lng, lat, image_source, image_detail, narration, video_source} */
-
-  
-
-
-
 
 
   const circleRangeOptions = {
@@ -230,7 +216,6 @@ export default function Maps () {
           <Body>
             <Testt>
               <ToggleButton onClick={() => setShowSemiCircle(!showSemiCircle)}>
-                토글
               </ToggleButton>
               <SemiCircle show={showSemiCircle}>
                 <div>
@@ -248,10 +233,6 @@ export default function Maps () {
 
       </div>
 
-
-      <div>
-        
-      </div>
     </div>
   )
 }
@@ -263,33 +244,55 @@ const Body = styled.div`
 `;
 
 const ToggleButton = styled.button`
+  position: absolute;
+  bottom: 20px;
   z-index: 50;
+  left: -8%;
+
+  width: 70px;
+  height: 70px;
+  background-image: url('https://w7.pngwing.com/pngs/952/332/png-transparent-ball-pocket-monster-poke-safari-poke-ball-set-icon.png');
+  background-size: cover;  // 이미지를 버튼 크기에 맞게 조절
+  background-repeat: no-repeat;  // 이미지를 반복하지 않음
+  border: none;
+
 `;
 
 const SemiCircle = styled.div`
-z-index: 20;
-  position: absolute;
-  bottom: -150px;
-  left: 50%;
-  transform: translateX(-50%) ${props => props.show ? 'translateY(0)' : 'translateY(100%)'}; // 위로 올라오는 애니메이션 추가
-  width: 120%;
-  height: 400px;
+  position: relative;
+  bottom: -100px;
+  transform: translateX(-50%) ${props => props.show ? 'translateY(0)' : 'translateY(100%)'};
+  width: 500px;
+  height: 350px;
   background: rgb(114, 161, 111, 0.5);
   border-radius: 100% 100% 0 0;
   display: flex;
-  justify-content: space-around;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
   transition: all 0.5s ease-in-out;
   opacity: ${props => props.show ? 1 : 0};
   visibility: ${props => props.show ? 'visible' : 'hidden'};
+
+  div:first-child {
+    align-self: center;
+  }
+
+  div:last-child {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    padding: 10px 20px;
+    margin-bottom: 80px;
+  }
 `;
 
 const SemiCircleButton = styled.button`
-  flex: 1;
-  height: 50%;
+  width: 80px;
+  height: 80px;
   background-color: #72A16F; // 배경색 설정
   border-radius: 50%; // 원 모양 만들기
-  border: none; // 기본 테두리 제거
+  border: 2px solid #72A16F; // 기본 테두리 제거
 `;
 
 
