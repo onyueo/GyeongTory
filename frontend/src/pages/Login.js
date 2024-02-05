@@ -48,6 +48,7 @@ const Login = () => {
           color="#E4E7EC"
           activecolor="#BCBCBD"
           placeholder="이메일"
+          type="email"
         ></ButtonBlank>
 
         <ButtonBlank
