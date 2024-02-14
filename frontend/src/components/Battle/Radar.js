@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import io from "socket.io-client";
@@ -64,18 +64,29 @@ const GreenScanner = styled.div`
 const Radar = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const [username, setUsername] = useState({});
-
+  const [userList, setUserList] = useState([]);
+  const userRef = useRef(null);
   useEffect(() => {
-    setUsername(user);
-
+    // socket 접속 시 서버에 정보 전송
     socket.emit("send_location", {
       lng: "127.00004",
       lat: "67.55553",
       nickname: user.nickname,
       user_id: user.id,
     });
+  }, []);
+
+  useEffect(() => {
+    setUsername(user);
+    let list = [];
+
+    // 위치 리스닝
     socket.on("get_location", (data) => {
-      console.log(data);
+      console.log(data.user_id, user.id);
+      if (data.user_id !== user.id && !list.includes(data.user_id)) {
+        list.push(data);
+        setUserList(list);
+      }
     });
   }, [socket]); // socket이 변경될 때마다(이벤트 발생) useEffect가 실행되도록 종속성 목록에 포함
 
@@ -109,6 +120,12 @@ const Radar = () => {
       <button style={{ zIndex: 1000 }} onClick={sendQuestion}>
         문제 제시
       </button>
+      <div>
+        {/* userList를 사용하여 각 사용자의 nickname을 표시 */}
+        {userList.map((user) => (
+          <div key={user.user_id}>{user.nickname}</div>
+        ))}
+      </div>
       <OuterCircle>
         <GreenScanner></GreenScanner>
       </OuterCircle>
