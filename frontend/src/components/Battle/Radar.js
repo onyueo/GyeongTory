@@ -5,6 +5,7 @@ import io from "socket.io-client";
 import Battle from "../../assets/Battle.png";
 import useStore from "../../stores/store";
 import { useNavigate } from "react-router-dom";
+import CardSelect from "./CardSelect";
 const Frame = styled.div`
   display: flex;
   flex-direction: column;
@@ -105,8 +106,9 @@ const Radar = () => {
   const [userList, setUserList] = useState([]); // 현재 사용자 주변 사용자 리스트
   const [battleState, setBattleState] = useState(false); // 현재 배틀 상태 정보
   const [holdingList, setHoldingList] = useState([]); // 사용자 보유 카드 리스트
-  const [selectCard, setSelectCard] = useState(null); // 선택 카드 번호
+  const [setselectCard, setSelectCard] = useState(null); // 선택 카드 번호
   const [nextState, setNextState] = useState(false);
+  const ws = useRef(null);
   let navigate = useNavigate();
   // 소켓 연결
   useEffect(() => {
@@ -117,6 +119,7 @@ const Radar = () => {
         transports: ["websocket"],
       })
     );
+    // if (socket) ws.current = socket;
     // 보유 카드 리스트 정보
     getHoldingList();
   }, []); // 처음 렌더링 될 때만 실행
@@ -179,35 +182,35 @@ const Radar = () => {
       socket.on("get_message", (data) => {
         console.log(data);
         // let msg = window.confirm(data.message);
-        if (data.message.includes("배틀을 신청하였습니다.")) {
-          let msg = getConfirm(data.message);
-          console.log(msg);
-          if (msg) {
-            // 배틀 신청 수락 emit
-            socket.emit("send_message", {
-              socket_id: data.opponent_socket_id,
-              opponent_socket_id: data.socket_id,
-              message: `${user.nickname}님이 배틀을 수락하였습니다.`,
-            });
-            alert("배틀을 시작합니다. 제출 카드를 선택해주세요.");
-            setBattleState(true);
-          } else {
-            // 배틀 신청 거절 emit
-            socket.emit("send_message", {
-              socket_id: data.opponent_socket_id,
-              opponent_socket_id: data.socket_id,
-              message: `${user.nickname}님이 배틀을 거절하였습니다.`,
-            });
-            alert("배틀이 거절됐습니다.");
-            setBattleState(false);
-          }
-        } else if (data.message.includes("배틀을 수락하였습니다.")) {
+        // if (data.message.includes("배틀을 신청하였습니다.")) {
+        let msg = getConfirm(data.message);
+        console.log(msg);
+        if (msg) {
+          // 배틀 신청 수락 emit
+          socket.emit("send_message", {
+            socket_id: data.opponent_socket_id,
+            opponent_socket_id: data.socket_id,
+            message: `${user.nickname}님이 배틀을 수락하였습니다.`,
+          });
           alert("배틀을 시작합니다. 제출 카드를 선택해주세요.");
           setBattleState(true);
-        } else if (data.message.includes("배틀을 거절하였습니다.")) {
+        } else {
+          // 배틀 신청 거절 emit
+          socket.emit("send_message", {
+            socket_id: data.opponent_socket_id,
+            opponent_socket_id: data.socket_id,
+            message: `${user.nickname}님이 배틀을 거절하였습니다.`,
+          });
           alert("배틀이 거절됐습니다.");
           setBattleState(false);
         }
+        // } else if (data.message.includes("배틀을 수락하였습니다.")) {
+        //   alert("배틀을 시작합니다. 제출 카드를 선택해주세요.");
+        //   setBattleState(true);
+        // } else if (data.message.includes("배틀을 거절하였습니다.")) {
+        //   alert("배틀이 거절됐습니다.");
+        //   setBattleState(false);
+        // }
       });
 
       // 소켓 연결 없는 사용자 리스트 제거
@@ -218,6 +221,8 @@ const Radar = () => {
         );
       });
     }
+    if (socket) ws.current = socket;
+
     // console.log(mySocket);
 
     // 컴포넌트 언마운트시 소켓 연결 해제
@@ -288,7 +293,11 @@ const Radar = () => {
     }
   };
   const handleNext = () => {
-    if (selectCard === "" || selectCard === null || selectCard === undefined) {
+    if (
+      setselectCard === "" ||
+      setselectCard === null ||
+      setselectCard === undefined
+    ) {
       alert("제출 카드를 선택해주세요.");
     } else {
       setNextState(true);
@@ -296,7 +305,7 @@ const Radar = () => {
   };
   return (
     <>
-      {battleState && !nextState && (
+      {/* {battleState && !nextState && (
         <Frame>
           <table>
             <thead>
@@ -328,7 +337,8 @@ const Radar = () => {
           </table>
           <button onClick={handleNext}>완료</button>
         </Frame>
-      )}
+      )} */}
+      {battleState && <CardSelect ws={ws.current} />}
       {!battleState && !nextState && (
         <RadarDiv>
           {userList.map((user) => (
